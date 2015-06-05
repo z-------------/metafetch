@@ -25,24 +25,26 @@ app.get("/fetch", function(req, res) {
         
         var linkQuery = new YQL("select * from html where url='" + url + "' and xpath='//link[contains(@rel, \"icon\")]'");
         linkQuery.exec(function(err, result) {
-            var sizePreference = ["57x57", "60x60", "72x72", "76x76", "96x96", "114x114", "120x120", "144x144", "152x152", "180x180", "192x192"];
-            var icons = result.query.results.link;
+            if (!err && result && result.query && result.query.results && result.query.results.link) {
+                var sizePreference = ["57x57", "60x60", "72x72", "76x76", "96x96", "114x114", "120x120", "144x144", "152x152", "180x180", "192x192"];
+                var icons = result.query.results.link;
 
-            icons.sort(function(a, b){
-                var sizeA = a.sizes;
-                var sizeB = b.sizes;
-                if (sizePreference.indexOf(sizeA) > sizePreference.indexOf(sizeB)) return -1;
-                if (sizePreference.indexOf(sizeA) < sizePreference.indexOf(sizeB)) return 1;
-                return 0;
-            });
+                icons.sort(function(a, b){
+                    var sizeA = a.sizes;
+                    var sizeB = b.sizes;
+                    if (sizePreference.indexOf(sizeA) > sizePreference.indexOf(sizeB)) return -1;
+                    if (sizePreference.indexOf(sizeA) < sizePreference.indexOf(sizeB)) return 1;
+                    return 0;
+                });
 
-            icons = icons.map(function(icon){
-                return URI(icon.href).absoluteTo(url).toString();
-            });
+                icons = icons.map(function(icon){
+                    return URI(icon.href).absoluteTo(url).toString();
+                });
 
-            object.icon = icons;
+                object.icon = icons;
 
-            res.append("Content-Type", "application/json");
+                res.append("Content-Type", "application/json");
+            }
             res.send(JSON.stringify(object));
         });
     }
